@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | TrackIT</title>
+    <link rel="stylesheet" href="css/admin_dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="admin-dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-cogs"></i>
+                <span class="sidebar-title">Admin Panel</span>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="active"><i class="fas fa-tachometer-alt"></i> Dashboard</li>
+                    <li><i class="fas fa-users"></i> Manage Users</li>
+                    <li><i class="fas fa-building"></i> Offices</li>
+                    <li><i class="fas fa-folder-open"></i> Documents</li>
+                    <li><i class="fas fa-chart-bar"></i> Reports</li>
+                    <li><i class="fas fa-clipboard-list"></i> Logs</li>
+                    <li><i class="fas fa-cog"></i> Settings</li>
+                    <li><a href="#" id="logoutLink"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                </ul>
+            </nav>
+        </aside>
+        <main class="main-content">
+            <header class="top-bar">
+                <div class="top-bar-title">Dashboard</div>
+                <div class="top-bar-user">
+                    <i class="fas fa-user-circle"></i> Admin
+                </div>
+            </header>
+            <section class="stats-cards">
+                <div class="stats-card">
+                    <div class="stats-icon"><i class="fas fa-file-alt"></i></div>
+                    <div class="stats-info">
+                        <div class="stats-label">Total Documents</div>
+                        <div class="stats-value">123</div>
+                    </div>
+                </div>
+                <div class="stats-card">
+                    <div class="stats-icon"><i class="fas fa-users"></i></div>
+                    <div class="stats-info">
+                        <div class="stats-label">Total Users</div>
+                        <div class="stats-value">12</div>
+                    </div>
+                </div>
+                <div class="stats-card">
+                    <div class="stats-icon"><i class="fas fa-building"></i></div>
+                    <div class="stats-info">
+                        <div class="stats-label">Offices</div>
+                        <div class="stats-value">6</div>
+                    </div>
+                </div>
+                <div class="stats-card">
+                    <div class="stats-icon"><i class="fas fa-check-circle"></i></div>
+                    <div class="stats-info">
+                        <div class="stats-label">Completed Docs</div>
+                        <div class="stats-value">45</div>
+                    </div>
+                </div>
+            </section>
+            <section class="main-table-section">
+                <h2>Recent Activity</h2>
+                <table class="main-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>User</th>
+                            <th>Action</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>2024-06-28</td>
+                            <td>admin</td>
+                            <td>Created User</td>
+                            <td>Added user John Doe</td>
+                        </tr>
+                        <tr>
+                            <td>2024-06-28</td>
+                            <td>admin</td>
+                            <td>Updated Document</td>
+                            <td>Document #123 status changed to Completed</td>
+                        </tr>
+                        <tr>
+                            <td>2024-06-27</td>
+                            <td>admin</td>
+                            <td>Generated Report</td>
+                            <td>Monthly summary report</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+            <section class="users-section" style="display:none;">
+                <h2>Manage Users</h2>
+                <button id="addUserBtn">Add User</button>
+                <table id="usersTable">
+                    <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>Office</th>
+                            <th>Role</th>
+                            <th>Active</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </section>
+            <section class="offices-section" style="display:none;">
+                <h2>Offices</h2>
+                <button id="addOfficeBtn">Add Office</button>
+                <table id="officesTable">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Code</th>
+                            <th>Description</th>
+                            <th>Active</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </section>
+        </main>
+    </div>
+    <script src="js/admin_dashboard.js"></script>
+    <!-- Logout Confirmation Modal -->
+    <div id="logoutModal" class="modal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.25);z-index:999;align-items:center;justify-content:center;">
+        <div class="modal-content" style="background:#fff;padding:32px 32px 24px 32px;border-radius:12px;max-width:340px;width:96%;box-shadow:0 8px 32px rgba(44,62,80,0.18),0 1.5px 6px rgba(44,62,80,0.10);text-align:center;">
+            <p style="margin-bottom: 24px; font-size: 1.1em;">Are you sure you want to log out?</p>
+            <div style="display:flex;gap:16px;justify-content:center;">
+                <button id="cancelLogout" style="background:#e5e7eb;color:#222;padding:8px 18px;border-radius:6px;border:none;">Cancel</button>
+                <button id="confirmLogout" style="background:#2563eb;color:#fff;padding:8px 18px;border-radius:6px;border:none;">Logout</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 
