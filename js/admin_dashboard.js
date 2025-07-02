@@ -46,10 +46,10 @@ document.addEventListener('DOMContentLoaded', function() {
     async function fetchData() {
         try {
             const [usersRes, officesRes, documentsRes, logsRes] = await Promise.all([
-                fetch('http://localhost:3000/api/users'),
-                fetch('http://localhost:3000/api/offices'),
-                fetch('http://localhost:3000/api/documents'),
-                fetch('http://localhost:3000/api/logs')
+                fetch('https://trackit-backend-xu6a.onrender.com/api/users'),
+                fetch('https://trackit-backend-xu6a.onrender.com/api/offices'),
+                fetch('https://trackit-backend-xu6a.onrender.com/api/documents'),
+                fetch('https://trackit-backend-xu6a.onrender.com/api/logs')
             ]);
             users = await usersRes.json();
             offices = await officesRes.json();
@@ -119,19 +119,20 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     window.deleteUser = async function(id) {
         if (confirm('Delete this user?')) {
-            await fetch(`http://localhost:3000/api/users/${id}`, { method: 'DELETE' });
+            await fetch(`https://trackit-backend-xu6a.onrender.com/api/users/${id}`, { method: 'DELETE' });
             fetchData();
         }
     };
     document.getElementById('addUserBtn').onclick = async function() {
         const username = prompt('Username?');
+        const password = prompt('Password?');
         const office_id = prompt('Office ID?');
         const role = prompt('Role?');
-        if (username && office_id && role) {
-            await fetch('http://localhost:3000/api/users', {
+        if (username && password && office_id && role) {
+            await fetch('https://trackit-backend-xu6a.onrender.com/api/users', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, office_id, role, is_active: true })
+                body: JSON.stringify({ username, password, office_id, role, is_active: true })
             });
             fetchData();
         }
@@ -159,7 +160,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     window.deleteOffice = async function(id) {
         if (confirm('Delete this office?')) {
-            await fetch(`http://localhost:3000/api/offices/${id}`, { method: 'DELETE' });
+            await fetch(`https://trackit-backend-xu6a.onrender.com/api/offices/${id}`, { method: 'DELETE' });
             fetchData();
         }
     };
@@ -168,7 +169,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const office_code = prompt('Office Code?');
         const description = prompt('Description?');
         if (office_name && office_code) {
-            await fetch('http://localhost:3000/api/offices', {
+            await fetch('https://trackit-backend-xu6a.onrender.com/api/offices', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ office_name, office_code, description, is_active: true })
