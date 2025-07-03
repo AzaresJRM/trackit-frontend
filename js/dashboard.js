@@ -1021,21 +1021,49 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         // Handle form submit
         if (outgoingNewDocForm) {
-            outgoingNewDocForm.onsubmit = function(e) {
+            outgoingNewDocForm.onsubmit = async function(e) {
                 e.preventDefault();
                 const title = document.getElementById('outgoingDocTitle').value.trim();
-                const type = document.getElementById('outgoingDocType').value;
+                const typeName = document.getElementById('outgoingDocType').value;
                 const content = document.getElementById('outgoingDocContent').value.trim();
                 const office = document.getElementById('outgoingDocOffice').value;
-                if (!title || !type || !office) return;
-                const code = generateDocCode(type);
-                const timestamp = new Date().toLocaleString();
-                window.outgoingDocs.push({ code, title, type, content, office, status: 'Released', timestamp });
-                renderOutgoingCards();
-                outgoingNewDocModal.style.display = 'none';
-                outgoingNewDocForm.reset();
-                if (window.updateSidebarBadges) window.updateSidebarBadges();
-                if (window.updateSummaryCards) window.updateSummaryCards();
+                if (!title || !typeName || !office) return;
+
+                // Get logged-in user
+                const user = window.loggedInUser;
+
+                // Find the type_id for the selected type name
+                const docType = documentTypes.find(dt => dt.type_name === typeName);
+                if (!docType) {
+                    alert('Invalid document type selected.');
+                    return;
+                }
+                const type_id = docType._id;
+                const requester_office_id = user.office_id;
+
+                // Send to backend
+                const response = await fetch('https://trackit-backend-xu6a.onrender.com/api/documents', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title,
+                        content,
+                        type_id,
+                        requester_office_id,
+                        status: 'RELEASED'
+                    })
+                });
+                const result = await response.json();
+                if (response.ok) {
+                    // Optionally, update your UI with the new document
+                    renderOutgoingCards();
+                    outgoingNewDocModal.style.display = 'none';
+                    outgoingNewDocForm.reset();
+                    if (window.updateSidebarBadges) window.updateSidebarBadges();
+                    if (window.updateSummaryCards) window.updateSummaryCards();
+                } else {
+                    alert(result.error || 'Failed to create document');
+                }
             };
         }
         // Initial render
@@ -1093,4 +1121,14 @@ document.addEventListener('DOMContentLoaded', () => {
             userNameElem.textContent = window.loggedInUser.office_id || window.loggedInUser.username;
         }
     }
+
+    let documentTypes = [];
+
+    async function loadDocumentTypes() {
+        const res = await fetch('https://trackit-backend-xu6a.onrender.com/api/document-types');
+        documentTypes = await res.json();
+    }
+    window.loadDocumentTypes = loadDocumentTypes;
+
+    loadDocumentTypes();
 });
