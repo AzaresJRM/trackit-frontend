@@ -39,6 +39,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     alert(result.message || 'Invalid username or password.');
                     return;
                 }
+                // Store user info for dashboard
+                localStorage.setItem('loggedInUser', JSON.stringify(result));
                 // Redirect based on role
                 if (result.role === 'admin') {
                     window.location.href = 'admin_dashboard.html';

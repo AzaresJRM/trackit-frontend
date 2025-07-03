@@ -1,3 +1,5 @@
+window.loggedInUser = JSON.parse(localStorage.getItem('loggedInUser') || '{}');
+
 document.addEventListener('DOMContentLoaded', () => {
     const logoutLink = document.getElementById('logoutLink');
     const logoutModal = document.getElementById('logoutModal');
