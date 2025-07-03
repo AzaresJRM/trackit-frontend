@@ -547,11 +547,11 @@ document.addEventListener('DOMContentLoaded', () => {
         window.incomingDocs = window.incomingDocs || [
             {
                 code: 'CLASE-2025-06-0001',
-                office: "DEAN'S OFFICE",
+                office: "CLASE Dean's Office",
                 subject: 'REQUEST FOR APPROVAL',
                 content: 'Approval for this student to enroll in BSIT Program: John Russel Soria',
                 type: 'COMMUNICATION LETTER',
-                fromOffice: "DEAN'S OFFICE",
+                fromOffice: "CLASE Dean's Office",
                 releasedBy: 'DELA CRUZ',
                 releasedDate: 'FEB. 08, 2024 11:00 PM',
                 forwardedTo: null
@@ -559,7 +559,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ];
         const officeOptions = [
             'VPAA',
-            "Dean's Office",
+            "CLASE Dean's Office",
             'Registrar',
             'Accounting',
             'HRMO',
@@ -807,7 +807,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ];
         const officeOptions = [
             'VPAA',
-            "Dean's Office",
+            "CLASE Dean's Office",
             'Registrar',
             'Accounting',
             'HRMO',
@@ -1083,4 +1083,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Example: After rendering cards or changing arrays, call:
     // updateDashboardCounts();
+
+    // Set sidebar/profile office name dynamically after login
+    if (window.loggedInUser) {
+        const userNameElem = document.querySelector('.user-name');
+        if (userNameElem) {
+            userNameElem.textContent = window.loggedInUser.office_id || window.loggedInUser.username;
+        }
+    }
 });

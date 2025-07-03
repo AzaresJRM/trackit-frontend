@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             try {
                 // Call backend API for login
-                const response = await fetch('https://trackit-backend-xu6a.onrender.com/api/login', {
+                const response = await fetch('https://trackit-backend-xu6a.onrender.com/api/users/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username, password })
