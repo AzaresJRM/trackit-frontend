@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             try {
                 // Call backend API for login
-                const response = await fetch('https://trackit-backend-xu6a.onrender.com/api/users/login', {
+                const response = await fetch('https://trackit-backend-xu6a.onrender.com/api/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username, password })
@@ -80,5 +80,5 @@ function getAllUsers() {
 //     console.error('Error adding user:', error);
 // });
 
-// Call getAllUsers to test
+// Call getAllUimage.pngest
 getAllUsers(); 
