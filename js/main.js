@@ -40,6 +40,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
                 // Store user info for dashboard
+                if (result.office_id && typeof result.office_id === 'object' && result.office_id.$oid) {
+                    result.office_id = result.office_id.$oid;
+                }
                 localStorage.setItem('loggedInUser', JSON.stringify(result));
                 // Redirect based on role
                 if (result.role === 'admin') {
