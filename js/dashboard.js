@@ -439,9 +439,17 @@ document.addEventListener('DOMContentLoaded', () => {
             const type = document.getElementById('type').value;
             const remarks = document.getElementById('remarks').value;
 
-            // TEMP: Hardcode Accounting Office ObjectId for testing
-            const requester_office_id = "6866a4ca27d1a8d7747b3aae";
-            console.log('DEBUG: HARDCODED OFFICE ID TEST');
+            // Get logged-in user
+            const user = window.loggedInUser;
+            const requester_office_id = user.office_id;
+            // Find the type_id for the selected type name
+            const docType = documentTypes.find(dt => dt.type_name === type);
+            if (!docType) {
+                alert('Invalid document type selected.');
+                return;
+            }
+            const type_id = docType._id;
+            // Debug log
             console.log({
                 title,
                 content,
@@ -1056,8 +1064,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const office = document.getElementById('outgoingDocOffice').value;
                 if (!title || !typeName || !office) return;
 
-                // TEMP: Hardcode Accounting Office ObjectId for testing
-                const requester_office_id = "6866a4ca27d1a8d7747b3aae";
+                // Get logged-in user
+                const user = window.loggedInUser;
+                const requester_office_id = user.office_id;
                 // Find the type_id for the selected type name
                 const docType = documentTypes.find(dt => dt.type_name === typeName);
                 if (!docType) {
@@ -1065,9 +1074,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
                 const type_id = docType._id;
-
                 // Debug log
-                console.log('DEBUG: HARDCODED OFFICE ID TEST');
                 console.log({
                     title,
                     content,
