@@ -441,7 +441,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // TEMP: Hardcode Accounting Office ObjectId for testing
             const requester_office_id = "6866a4ca27d1a8d7747b3aae";
-            // Debug log
+            console.log('DEBUG: HARDCODED OFFICE ID TEST');
             console.log({
                 title,
                 content,
