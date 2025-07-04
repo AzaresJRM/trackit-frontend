@@ -439,12 +439,39 @@ document.addEventListener('DOMContentLoaded', () => {
             const type = document.getElementById('type').value;
             const remarks = document.getElementById('remarks').value;
 
-            // Add your logic to handle new document creation here
-            alert(`New document created!\nRequisitioner: ${requisitioner}\nTitle: ${title}\nType: ${type}`);
-            
-            // Reset form and close modal
-            newDocumentForm.reset();
-            newDocumentModal.style.display = 'none';
+            // TEMP: Hardcode Accounting Office ObjectId for testing
+            const requester_office_id = "6866a4ca27d1a8d7747b3aae";
+            // Debug log
+            console.log({
+                title,
+                content,
+                type_id,
+                requester_office_id,
+                status: 'RELEASED'
+            });
+            // Send to backend
+            const response = await fetch('https://trackit-backend-xu6a.onrender.com/api/documents', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    title,
+                    content,
+                    type_id,
+                    requester_office_id,
+                    status: 'RELEASED'
+                })
+            });
+            const result = await response.json();
+            if (response.ok) {
+                // Optionally, update your UI with the new document
+                renderOutgoingCards();
+                newDocumentModal.style.display = 'none';
+                newDocumentForm.reset();
+                if (window.updateSidebarBadges) window.updateSidebarBadges();
+                if (window.updateSummaryCards) window.updateSummaryCards();
+            } else {
+                alert(result.error || 'Failed to create document');
+            }
         });
     }
 
@@ -1029,9 +1056,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const office = document.getElementById('outgoingDocOffice').value;
                 if (!title || !typeName || !office) return;
 
-                // Get logged-in user
-                const user = window.loggedInUser;
-                const requester_office_id = user.office_id;
+                // TEMP: Hardcode Accounting Office ObjectId for testing
+                const requester_office_id = "6866a4ca27d1a8d7747b3aae";
 
                 // Find the type_id for the selected type name
                 const docType = documentTypes.find(dt => dt.type_name === typeName);
