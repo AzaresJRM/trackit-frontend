@@ -1058,7 +1058,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // TEMP: Hardcode Accounting Office ObjectId for testing
                 const requester_office_id = "6866a4ca27d1a8d7747b3aae";
-
                 // Find the type_id for the selected type name
                 const docType = documentTypes.find(dt => dt.type_name === typeName);
                 if (!docType) {
@@ -1068,6 +1067,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const type_id = docType._id;
 
                 // Debug log
+                console.log('DEBUG: HARDCODED OFFICE ID TEST');
                 console.log({
                     title,
                     content,
