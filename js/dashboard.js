@@ -1135,8 +1135,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Set sidebar/profile office name dynamically after login or show 'Guest'
     const userNameElem = document.querySelector('.user-name');
+    let user = null;
+    try {
+        user = JSON.parse(localStorage.getItem('loggedInUser'));
+    } catch (e) {
+        user = null;
+    }
     if (userNameElem) {
-        const user = window.loggedInUser;
         if (user && user.office_name) {
             userNameElem.textContent = user.office_name;
         } else {
