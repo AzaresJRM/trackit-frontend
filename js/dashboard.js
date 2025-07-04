@@ -1041,6 +1041,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 const type_id = docType._id;
 
+                // Debug log
+                console.log({
+                    title,
+                    content,
+                    type_id,
+                    requester_office_id,
+                    status: 'RELEASED'
+                });
                 // Send to backend
                 const response = await fetch('https://trackit-backend-xu6a.onrender.com/api/documents', {
                     method: 'POST',
