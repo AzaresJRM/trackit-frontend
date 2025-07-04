@@ -1031,6 +1031,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Get logged-in user
                 const user = window.loggedInUser;
+                const requester_office_id = user.office_id;
 
                 // Find the type_id for the selected type name
                 const docType = documentTypes.find(dt => dt.type_name === typeName);
@@ -1039,7 +1040,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
                 const type_id = docType._id;
-                const requester_office_id = user.office_id;
 
                 // Send to backend
                 const response = await fetch('https://trackit-backend-xu6a.onrender.com/api/documents', {
