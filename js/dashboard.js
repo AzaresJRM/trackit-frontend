@@ -1142,8 +1142,8 @@ document.addEventListener('DOMContentLoaded', () => {
         user = null;
     }
     if (userNameElem) {
-        if (user && user.office_name) {
-            userNameElem.textContent = user.office_name;
+        if (user && user.office_id && user.office_id.office_name) {
+            userNameElem.textContent = user.office_id.office_name;
         } else {
             userNameElem.textContent = 'Guest';
         }
