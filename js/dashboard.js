@@ -443,7 +443,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     title,
                     content,
                     type_id,
-                    requester_office_id,
+                    requester_office_id: requester_office_id && requester_office_id._id ? requester_office_id._id : requester_office_id,
                     status: 'RELEASED'
                 })
             });
@@ -1068,7 +1068,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         title,
                         content,
                         type_id,
-                        requester_office_id,
+                        requester_office_id: requester_office_id && requester_office_id._id ? requester_office_id._id : requester_office_id,
                         status: 'RELEASED'
                     })
                 });
