@@ -108,7 +108,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Section management and navigation
     const contentHeaderTitle = document.querySelector('.main-content .content-header h2');
-    const documentsSection = document.getElementById('documents-section');
     const incomingSection = document.getElementById('incoming-section');
     const receivedSection = document.getElementById('received-section');
     const outgoingSection = document.getElementById('outgoing-section');
@@ -119,7 +118,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Map sidebar navigation links to their corresponding content sections
     const sectionsMap = [
-        { link: document.querySelector('.nav-link[data-section="documents"]'), section: documentsSection }, // Documents
         { link: document.querySelector('.nav-link[data-section="incoming"]'), section: incomingSection },  // Incoming
         { link: document.querySelector('.nav-link[data-section="received"]'), section: receivedSection },  // Received
         { link: document.querySelector('.nav-link[data-section="outgoing"]'), section: outgoingSection },  // Outgoing
@@ -129,7 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
         { link: document.querySelector('.nav-link[data-section="track"]'), section: trackSection }       // Track
     ];
 
-    function showSection(sectionToShow, sidebarLinkToActivate, headerTitle, showNewDocButton) {
+    function showSection(sectionToShow, sidebarLinkToActivate, headerTitle) {
         // Hide all managed main content sections
         sectionsMap.forEach(item => {
             if (item.section) {
@@ -151,19 +149,14 @@ document.addEventListener('DOMContentLoaded', () => {
             sidebarLinkToActivate.classList.add('active');
         }
 
-        // Update main content header title
+        // Update main content header title (if present)
         if (contentHeaderTitle && headerTitle) {
             contentHeaderTitle.textContent = headerTitle;
         }
-
-        // Toggle visibility of the New Documents button
-        if (newDocBtn) {
-            newDocBtn.style.display = showNewDocButton ? 'inline-block' : 'none';
-        }
     }
 
-    // Initial setup: ensure Documents section is visible and active on load
-    showSection(documentsSection, sectionsMap[0].link, 'Documents', true); // Documents is the first one
+    // Initial setup: ensure Incoming section is visible and active on load
+    showSection(incomingSection, sectionsMap[0].link, 'Incoming Documents'); // Incoming is the first one
 
     // Add event listeners for all sidebar links
     sectionsMap.forEach((item, index) => {
@@ -171,44 +164,30 @@ document.addEventListener('DOMContentLoaded', () => {
             item.link.addEventListener('click', (e) => {
                 e.preventDefault(); // Prevent default link behavior
                 let headerTitle = '';
-                let showNewDocButton = false;
-
                 switch(index) {
-                    case 0: // Documents
-                        headerTitle = 'Documents';
-                        showNewDocButton = true;
-                        break;
-                    case 1: // Incoming
+                    case 0: // Incoming
                         headerTitle = 'Incoming Documents';
-                        showNewDocButton = false;
                         break;
-                    case 2: // Received
+                    case 1: // Received
                         headerTitle = 'Received Documents';
-                        showNewDocButton = false;
                         break;
-                    case 3: // Outgoing
+                    case 2: // Outgoing
                         headerTitle = 'Outgoing Documents';
-                        showNewDocButton = false;
                         break;
-                    case 4: // Hold
+                    case 3: // Hold
                         headerTitle = 'Hold Documents';
-                        showNewDocButton = false;
                         break;
-                    case 5: // Complete
+                    case 4: // Complete
                         headerTitle = 'Complete Documents';
-                        showNewDocButton = false;
                         break;
-                    case 6: // Logs
+                    case 5: // Logs
                         headerTitle = 'Activity Logs';
-                        showNewDocButton = false;
                         break;
-                    case 7: // Track
+                    case 6: // Track
                         headerTitle = 'Track Documents';
-                        showNewDocButton = false;
                         break;
                 }
-
-                showSection(item.section, item.link, headerTitle, showNewDocButton);
+                showSection(item.section, item.link, headerTitle);
             });
         }
     });
@@ -430,9 +409,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Form submission for new documents
     const newDocumentForm = document.getElementById('newDocumentForm');
     if (newDocumentForm) {
-        newDocumentForm.addEventListener('submit', (e) => {
+        newDocumentForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
             const requisitioner = document.getElementById('requisitioner').value;
             const title = document.getElementById('title').value;
             const content = document.getElementById('content').value;
@@ -1155,11 +1133,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Example: After rendering cards or changing arrays, call:
     // updateDashboardCounts();
 
-    // Set sidebar/profile office name dynamically after login
-    if (window.loggedInUser) {
-        const userNameElem = document.querySelector('.user-name');
-        if (userNameElem) {
-            userNameElem.textContent = window.loggedInUser.office_id || window.loggedInUser.username;
+    // Set sidebar/profile office name dynamically after login or show 'Guest'
+    const userNameElem = document.querySelector('.user-name');
+    if (userNameElem) {
+        const user = window.loggedInUser;
+        if (user && user.office_name) {
+            userNameElem.textContent = user.office_name;
+        } else {
+            userNameElem.textContent = 'Guest';
         }
     }
 
