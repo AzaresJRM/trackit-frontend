@@ -1,6 +1,6 @@
 window.loggedInUser = JSON.parse(localStorage.getItem('loggedInUser') || '{}');
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const logoutLink = document.getElementById('logoutLink');
     const logoutModal = document.getElementById('logoutModal');
     const cancelLogout = document.getElementById('cancelLogout');
@@ -998,15 +998,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 card.className = 'document-card outgoing-card';
                 card.innerHTML = `
                     <div class="card-header">
-                        <div class="document-code">${doc.code}</div>
+                        <div class="document-code">${doc.document_code || '-'}</div>
                     </div>
                     <div class="card-content">
-                        <div class="card-row"><div class="label">Type:</div><div class="value">${doc.type}</div></div>
-                        <div class="card-row"><div class="label">Title:</div><div class="value">${doc.title}</div></div>
-                        <div class="card-row"><div class="label">Content:</div><div class="value">${doc.content || ''}</div></div>
-                        <div class="card-row"><div class="label">Destination Office:</div><div class="value">${doc.office}</div></div>
-                        <div class="card-row"><div class="label">Status:</div><div class="value"><span class="status-badge released">Released</span></div></div>
-                        <div class="card-row"><div class="label">Released Date:</div><div class="value">${doc.timestamp}</div></div>
+                        <div class="card-row"><div class="label">Type:</div><div class="value">${doc.type_id?.type_name || '-'}</div></div>
+                        <div class="card-row"><div class="label">Title:</div><div class="value">${doc.title || '-'}</div></div>
+                        <div class="card-row"><div class="label">Content:</div><div class="value">${doc.content || '-'}</div></div>
+                        <div class="card-row"><div class="label">Destination Office:</div><div class="value">${doc.requester_office_id?.office_name || '-'}</div></div>
+                        <div class="card-row"><div class="label">Status:</div><div class="value"><span class="status-badge released">${doc.status || '-'}</span></div></div>
+                        <div class="card-row"><div class="label">Released Date:</div><div class="value">${doc.created_at ? new Date(doc.created_at).toLocaleString() : '-'}</div></div>
                     </div>
                 `;
                 outgoingContainer.appendChild(card);
@@ -1166,11 +1166,12 @@ document.addEventListener('DOMContentLoaded', () => {
     loadDocumentTypes();
 
     async function fetchAndRenderOutgoingDocs() {
-        // Fetch all outgoing documents from the backend
-        // Adjust the endpoint or query as needed for your backend
+        // Always fetch all outgoing documents from the populated endpoint
         const res = await fetch('https://trackit-backend-xu6a.onrender.com/api/documents?type=outgoing');
         const docs = await res.json();
         window.outgoingDocs = docs;
         renderOutgoingCards();
     }
+
+    await fetchAndRenderOutgoingDocs();
 });
