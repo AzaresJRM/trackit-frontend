@@ -993,7 +993,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         function renderOutgoingCards() {
             if (!outgoingContainer) return;
             outgoingContainer.innerHTML = '';
-            window.outgoingDocs.forEach(doc => {
+            const user = JSON.parse(localStorage.getItem('loggedInUser'));
+            const officeId = user?.office_id?._id || user?.office_id;
+            // Only show outgoing docs for this office
+            const outgoingDocsForOffice = Array.isArray(window.outgoingDocs) && officeId
+                ? window.outgoingDocs.filter(doc => String(doc.requester_office_id?._id || doc.requester_office_id) === String(officeId))
+                : [];
+            outgoingDocsForOffice.forEach(doc => {
                 const card = document.createElement('div');
                 card.className = 'document-card outgoing-card';
                 card.innerHTML = `
@@ -1126,7 +1132,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         let outgoingCount = 0;
         if (Array.isArray(window.outgoingDocs) && officeId) {
             outgoingCount = window.outgoingDocs.filter(
-                doc => (doc.requester_office_id?._id || doc.requester_office_id) === officeId
+                doc => String(doc.requester_office_id?._id || doc.requester_office_id) === String(officeId)
             ).length;
         }
         const incomingEl = document.getElementById('incoming-docs-count');
