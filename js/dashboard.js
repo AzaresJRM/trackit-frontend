@@ -454,7 +454,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (response.ok) {
                 // Optionally, update your UI with the new document
                 renderOutgoingCards();
-                newDocumentModal.style.display = 'none';
+            newDocumentModal.style.display = 'none';
                 newDocumentForm.reset();
                 if (window.updateSidebarBadges) window.updateSidebarBadges();
                 if (window.updateSummaryCards) window.updateSummaryCards();
@@ -1088,10 +1088,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (response.ok) {
                     alert('Document successfully added!');
                     await fetchAndRenderOutgoingDocs();
-                    outgoingNewDocModal.style.display = 'none';
-                    outgoingNewDocForm.reset();
-                    if (window.updateSidebarBadges) window.updateSidebarBadges();
-                    if (window.updateSummaryCards) window.updateSummaryCards();
+                outgoingNewDocModal.style.display = 'none';
+                outgoingNewDocForm.reset();
+                if (window.updateSidebarBadges) window.updateSidebarBadges();
+                if (window.updateSummaryCards) window.updateSummaryCards();
                 } else {
                     alert(result.error || 'Failed to create document');
                 }
@@ -1190,4 +1190,90 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     await fetchAndRenderOutgoingDocs();
+
+    // --- INCOMING DOCUMENTS WORKFLOW ---
+    async function fetchAndRenderIncomingDocs() {
+        const user = JSON.parse(localStorage.getItem('loggedInUser'));
+        const myOfficeId = user.office_id?._id || user.office_id;
+        const res = await fetch(`https://trackit-backend-xu6a.onrender.com/api/documents/incoming?office_id=${myOfficeId}`);
+        const incomingDocs = await res.json();
+        window.incomingDocs = incomingDocs;
+        renderIncomingCards(incomingDocs);
+        updateIncomingBadge(incomingDocs.length);
+    }
+
+    function renderIncomingCards(docs) {
+        const incomingContainer = document.getElementById('incoming-container');
+        if (!incomingContainer) return;
+        incomingContainer.innerHTML = '';
+        docs.forEach(doc => {
+            const latestStatus = doc.status_history?.[doc.status_history.length - 1];
+            const fromOffice = latestStatus?.from_office_id?.office_name || '-';
+            const card = document.createElement('div');
+            card.className = 'document-card incoming-card';
+            card.innerHTML = `
+                <div class="card-header">
+                    <div class="document-code">${doc.document_code || '-'}</div>
+                </div>
+                <div class="card-content">
+                    <div class="card-row"><div class="label">From Office:</div><div class="value">${fromOffice}</div></div>
+                    <div class="card-row"><div class="label">Title:</div><div class="value">${doc.title || '-'}</div></div>
+                    <div class="card-row"><div class="label">Content:</div><div class="value">${doc.content || '-'}</div></div>
+                    <div class="card-row"><div class="label">Type:</div><div class="value">${doc.type_id?.type_name || '-'}</div></div>
+                    <div class="card-row"><div class="label">Status:</div><div class="value">${doc.status || '-'}</div></div>
+                    <button onclick="receiveDocument('${doc._id}')">Receive</button>
+                    <button onclick="holdDocument('${doc._id}')">Hold</button>
+                </div>
+            `;
+            incomingContainer.appendChild(card);
+        });
+    }
+
+    function updateIncomingBadge(count) {
+        const incomingBadge = document.querySelector('.nav-link[data-section="incoming"] .badge');
+        if (incomingBadge) incomingBadge.textContent = count;
+    }
+
+    async function receiveDocument(docId) {
+        const user = JSON.parse(localStorage.getItem('loggedInUser'));
+        const myOfficeId = user.office_id?._id || user.office_id;
+        const myUserId = user._id;
+        await fetch(`https://trackit-backend-xu6a.onrender.com/api/documents/${docId}/status`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                status: 'RECEIVED',
+                from_office_id: myOfficeId,
+                to_office_id: myOfficeId,
+                user_id: myUserId,
+                remarks: 'Document received'
+            })
+        });
+        await fetchAndRenderIncomingDocs();
+    }
+
+    async function holdDocument(docId) {
+        const user = JSON.parse(localStorage.getItem('loggedInUser'));
+        const myOfficeId = user.office_id?._id || user.office_id;
+        const myUserId = user._id;
+        await fetch(`https://trackit-backend-xu6a.onrender.com/api/documents/${docId}/status`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                status: 'ON_HOLD',
+                from_office_id: myOfficeId,
+                to_office_id: myOfficeId,
+                user_id: myUserId,
+                remarks: 'Document put on hold'
+            })
+        });
+        await fetchAndRenderIncomingDocs();
+    }
+
+    // On page load, also fetch incoming docs
+    await fetchAndRenderIncomingDocs();
+
+    // When switching to Incoming section, call fetchAndRenderIncomingDocs()
+    // Example:
+    // document.querySelector('.nav-link[data-section="incoming"]').addEventListener('click', fetchAndRenderIncomingDocs);
 });
