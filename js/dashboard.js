@@ -1119,15 +1119,25 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // --- DYNAMIC DASHBOARD CARD COUNTS ---
     function updateDashboardCounts() {
+        const user = JSON.parse(localStorage.getItem('loggedInUser'));
+        const officeId = user?.office_id?._id || user?.office_id;
         const incomingCount = Array.isArray(window.incomingDocs) ? window.incomingDocs.length : 0;
         const receivedCount = Array.isArray(window.receivedDocs) ? window.receivedDocs.length : 0;
-        const outgoingCount = Array.isArray(window.outgoingDocs) ? window.outgoingDocs.length : 0;
+        let outgoingCount = 0;
+        if (Array.isArray(window.outgoingDocs) && officeId) {
+            outgoingCount = window.outgoingDocs.filter(
+                doc => (doc.requester_office_id?._id || doc.requester_office_id) === officeId
+            ).length;
+        }
         const incomingEl = document.getElementById('incoming-docs-count');
         const receivedEl = document.getElementById('received-docs-count');
         const outgoingEl = document.getElementById('outgoing-docs-count');
         if (incomingEl) incomingEl.textContent = incomingCount;
         if (receivedEl) receivedEl.textContent = receivedCount;
         if (outgoingEl) outgoingEl.textContent = outgoingCount;
+        // Update sidebar badge for outgoing
+        const outgoingBadge = document.querySelector('.nav-link[data-section="outgoing"] .badge');
+        if (outgoingBadge) outgoingBadge.textContent = outgoingCount;
     }
     window.updateDashboardCounts = updateDashboardCounts;
     updateDashboardCounts();
