@@ -1,3 +1,5 @@
+console.log('DASHBOARD JS LOADED');
+
 window.loggedInUser = JSON.parse(localStorage.getItem('loggedInUser') || '{}');
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -1279,14 +1281,23 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Add after documentTypes and loadDocumentTypes
     async function populateOutgoingOfficeDropdown() {
-        const res = await fetch('https://trackit-backend-xu6a.onrender.com/api/offices');
-        const offices = await res.json();
-        const officeSelect = document.getElementById('outgoingDocOffice');
-        if (!officeSelect) return;
-        officeSelect.innerHTML = '<option value="">-- Select Office --</option>';
-        offices.forEach(office => {
-            officeSelect.innerHTML += `<option value="${office._id}">${office.office_name}</option>`;
-        });
+        try {
+            const res = await fetch('https://trackit-backend-xu6a.onrender.com/api/offices');
+            const offices = await res.json();
+            console.log('Fetched offices:', offices);
+            const officeSelect = document.getElementById('outgoingDocOffice');
+            if (!officeSelect) {
+                console.error('Dropdown not found!');
+                return;
+            }
+            officeSelect.innerHTML = '<option value="">-- Select Office --</option>';
+            offices.forEach(office => {
+                officeSelect.innerHTML += `<option value="${office._id}">${office.office_name}</option>`;
+            });
+            console.log('Dropdown populated!');
+        } catch (err) {
+            console.error('Error populating dropdown:', err);
+        }
     }
-    document.addEventListener('DOMContentLoaded', populateOutgoingOfficeDropdown);
+    await populateOutgoingOfficeDropdown();
 });
