@@ -995,7 +995,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             outgoingContainer.innerHTML = '';
             const user = JSON.parse(localStorage.getItem('loggedInUser'));
             const officeId = user?.office_id?._id || user?.office_id;
-            // Only show outgoing docs for this office
             const outgoingDocsForOffice = Array.isArray(window.outgoingDocs) && officeId
                 ? window.outgoingDocs.filter(doc => String(doc.requester_office_id?._id || doc.requester_office_id) === String(officeId))
                 : [];
@@ -1010,7 +1009,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <div class="card-row"><div class="label">Type:</div><div class="value">${doc.type_id?.type_name || '-'}</div></div>
                         <div class="card-row"><div class="label">Title:</div><div class="value">${doc.title || '-'}</div></div>
                         <div class="card-row"><div class="label">Content:</div><div class="value">${doc.content || '-'}</div></div>
-                        <div class="card-row"><div class="label">Destination Office:</div><div class="value">${doc.requester_office_id?.office_name || '-'}</div></div>
+                        <div class="card-row"><div class="label">Destination Office:</div><div class="value">${doc.current_office_id?.office_name || '-'}</div></div>
                         <div class="card-row"><div class="label">Status:</div><div class="value"><span class="status-badge released">${doc.status || '-'}</span></div></div>
                         <div class="card-row"><div class="label">Released Date:</div><div class="value">${doc.created_at ? new Date(doc.created_at).toLocaleString() : '-'}</div></div>
                     </div>
