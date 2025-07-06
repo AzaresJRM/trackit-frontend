@@ -851,4 +851,109 @@ body {
 
 .settings a, .settings a:visited {
     color: #fff !important;
+}
+
+.track-search-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 24px;
+    background: #f8fafc;
+    padding: 18px 24px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(44,62,80,0.06);
+}
+
+#track-results {
+    min-height: 120px;
+}
+
+.track-doc-card {
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 2px 12px rgba(44,62,80,0.08);
+    padding: 28px 32px 20px 32px;
+    margin-bottom: 32px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    transition: box-shadow 0.2s;
+}
+
+.track-doc-card:hover {
+    box-shadow: 0 4px 24px rgba(44,62,80,0.13);
+}
+
+.track-doc-main {
+    font-size: 1.08em;
+    margin-bottom: 18px;
+    color: #222;
+}
+
+.track-doc-main div {
+    margin-bottom: 7px;
+}
+
+.track-doc-timeline {
+    margin-top: 18px;
+}
+
+.track-doc-timeline h4 {
+    margin-bottom: 10px;
+    color: #2563eb;
+    font-size: 1.08em;
+    font-weight: 600;
+}
+
+.timeline {
+    border-left: 3px solid #2563eb33;
+    margin-left: 10px;
+    padding-left: 18px;
+}
+
+.timeline-item {
+    margin-bottom: 18px;
+    position: relative;
+}
+
+.timeline-item:before {
+    content: '';
+    position: absolute;
+    left: -25px;
+    top: 6px;
+    width: 12px;
+    height: 12px;
+    background: #2563eb;
+    border-radius: 50%;
+    box-shadow: 0 0 0 3px #2563eb22;
+}
+
+.timeline-status {
+    font-weight: 600;
+    color: #2563eb;
+    margin-bottom: 2px;
+}
+
+.timeline-meta {
+    font-size: 0.98em;
+    color: #555;
+}
+
+.timeline-date {
+    font-size: 0.93em;
+    color: #888;
+}
+
+.track-no-result, .timeline-empty {
+    text-align: center;
+    color: #888;
+    font-size: 1.08em;
+    margin-top: 32px;
+}
+
+.track-loading {
+    text-align: center;
+    color: #2563eb;
+    font-size: 1.1em;
+    margin-top: 32px;
 } 

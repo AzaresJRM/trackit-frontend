@@ -287,124 +287,72 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     // Track functionality
-    const trackSearchInput = document.getElementById('trackSearchInput');
-    const trackSearchType = document.getElementById('trackSearchType');
-    const trackResult = document.getElementById('trackResult');
-    const clearTrackSearch = document.getElementById('clearTrackSearch');
+    const trackSearchBtn = document.getElementById('track-search-btn');
+    const trackDocCode = document.getElementById('track-doc-code');
+    const trackDate = document.getElementById('track-date');
+    const trackMonth = document.getElementById('track-month');
+    const trackTime = document.getElementById('track-time');
+    const trackResults = document.getElementById('track-results');
 
-    if (trackSearchInput && trackResult) {
-        trackSearchInput.addEventListener('input', function() {
-            const searchTerm = this.value.trim();
-            
-            if (searchTerm.length > 0) {
-                clearTrackSearch.style.display = 'block';
-                displayTrackingInfo(searchTerm, trackSearchType.value);
+    if (trackSearchBtn) {
+        trackSearchBtn.addEventListener('click', async () => {
+            trackResults.innerHTML = '<div class="track-loading">Searching...</div>';
+            const code = trackDocCode.value.trim();
+            const date = trackDate.value;
+            const month = trackMonth.value;
+            const time = trackTime.value;
+            const docs = await fetchTrackedDocument({ code, date, month, time });
+            if (Array.isArray(docs) && docs.length > 0) {
+                trackResults.innerHTML = docs.map(renderTrackResult).join('');
+            } else if (docs && docs._id) {
+                trackResults.innerHTML = renderTrackResult(docs);
             } else {
-                clearTrackSearch.style.display = 'none';
-                trackResult.innerHTML = '<p class="placeholder-text">PLEASE ENTER A DOCUMENT CODE OR REFERENCE</p>';
+                trackResults.innerHTML = '<div class="track-no-result">No document found.</div>';
             }
         });
-
-        trackSearchType.addEventListener('change', function() {
-            const searchTerm = trackSearchInput.value.trim();
-            if (searchTerm.length > 0) {
-                displayTrackingInfo(searchTerm, this.value);
-            }
-        });
-
-        if (clearTrackSearch) {
-            clearTrackSearch.addEventListener('click', function() {
-            trackSearchInput.value = '';
-                clearTrackSearch.style.display = 'none';
-                trackResult.innerHTML = '<p class="placeholder-text">PLEASE ENTER A DOCUMENT CODE OR REFERENCE</p>';
-            });
-        }
     }
 
-    function displayTrackingInfo(searchTerm, searchType) {
-        // Sample tracking data - replace with actual data from your backend
-        const sampleData = {
-            'CSIT-2025-06-0001': {
-                code: 'CSIT-2025-06-0001',
-                title: 'LETTER REQUEST FOR CANCELLATION OF CLASSES',
-                requisitioner: 'CSIT OFFICE',
-                type: 'COMMUNICATION LETTER',
-                status: 'In Progress',
-                timeline: [
-                    { date: 'JUNE 26, 2025', time: '09:00 AM', action: 'Document Created', status: 'created' },
-                    { date: 'JUNE 26, 2025', time: '10:30 AM', action: 'Sent to Review', status: 'sent' },
-                    { date: 'JUNE 27, 2025', time: '02:15 PM', action: 'Under Review', status: 'review' }
-                ]
-            },
-            'VPAA-2025-06-0001': {
-                code: 'VPAA-2025-06-0001',
-                title: 'REQUEST FOR SPECIAL CLASS FORMS',
-                requisitioner: 'VPAA',
-                type: 'FORMS',
-                status: 'Received',
-                timeline: [
-                    { date: 'JUNE 26, 2025', time: '03:15 PM', action: 'Document Received', status: 'received' }
-                ]
-            }
-        };
-
-        let foundDocument = null;
-        
-        // Search based on type
-        if (searchType === 'code') {
-            foundDocument = sampleData[searchTerm.toUpperCase()];
-        } else if (searchType === 'title') {
-            foundDocument = Object.values(sampleData).find(doc => 
-                doc.title.toLowerCase().includes(searchTerm.toLowerCase())
-            );
-        } else if (searchType === 'requisitioner') {
-            foundDocument = Object.values(sampleData).find(doc => 
-                doc.requisitioner.toLowerCase().includes(searchTerm.toLowerCase())
-            );
-        }
-
-        if (foundDocument) {
-            displaySampleDocTimeline(foundDocument);
-        } else {
-            trackResult.innerHTML = `
-                <div class="no-result">
-                    <i class="fas fa-search"></i>
-                    <h3>No Document Found</h3>
-                    <p>The document "${searchTerm}" was not found in our system.</p>
-                </div>
-            `;
-        }
+    async function fetchTrackedDocument({ code, date, month, time }) {
+        let url = 'https://trackit-backend-xu6a.onrender.com/api/documents/search?';
+        const params = [];
+        if (code) params.push(`document_code=${encodeURIComponent(code)}`);
+        if (date) params.push(`date=${encodeURIComponent(date)}`);
+        if (month) params.push(`month=${encodeURIComponent(month)}`);
+        if (time) params.push(`time=${encodeURIComponent(time)}`);
+        url += params.join('&');
+        const res = await fetch(url);
+        return await res.json();
     }
 
-    function displaySampleDocTimeline(document) {
-        const statusClass = document.status === 'Received' ? 'received' : 'in-progress';
-        
-        trackResult.innerHTML = `
-            <div class="document-info">
-                <div class="doc-header">
-                    <h4>${document.code}</h4>
-                    <span class="status-badge ${statusClass}">${document.status}</span>
+    function renderTimeline(statusHistory) {
+        if (!statusHistory || !statusHistory.length) return '<div class="timeline-empty">No status history available.</div>';
+        return `<div class="timeline">
+            ${statusHistory.map(item => `
+                <div class="timeline-item">
+                    <div class="timeline-status">${item.status}</div>
+                    <div class="timeline-meta">${item.office_name || ''} ${item.user_name ? 'by ' + item.user_name : ''}</div>
+                    <div class="timeline-date">${new Date(item.date).toLocaleString()}</div>
                 </div>
-                <div class="doc-details">
-                    <p><strong>Title:</strong> ${document.title}</p>
-                    <p><strong>Requisitioner:</strong> ${document.requisitioner}</p>
-                    <p><strong>Type:</strong> ${document.type}</p>
-                </div>
-                <div class="timeline">
-                    <h5>Document Timeline</h5>
-                    ${document.timeline.map(item => `
-                        <div class="timeline-item">
-                            <div class="timeline-icon ${item.status}">
-                                <i class="fas fa-circle"></i>
-                            </div>
-                            <div class="timeline-content">
-                                <div class="timeline-action">${item.action}</div>
-                                <div class="timeline-date">${item.date} ${item.time}</div>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
+            `).join('')}
+        </div>`;
+    }
+
+    function renderTrackResult(doc) {
+        if (!doc) return '<div class="track-no-result">No document found.</div>';
+        return `
+        <div class="track-doc-card">
+            <div class="track-doc-main">
+                <div><b>Code:</b> ${doc.document_code}</div>
+                <div><b>Title:</b> ${doc.title}</div>
+                <div><b>Type:</b> ${doc.type_id?.type_name || '-'}</div>
+                <div><b>Current Office:</b> ${doc.current_office_id?.office_name || '-'}</div>
+                <div><b>Status:</b> ${doc.status}</div>
             </div>
+            <div class="track-doc-timeline">
+                <h4>Status Timeline</h4>
+                ${renderTimeline(doc.status_history)}
+            </div>
+        </div>
         `;
     }
 
