@@ -1080,7 +1080,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                         content,
                         type_id,
                         requester_office_id,
-                        status: 'RELEASED'
+                        status: 'RELEASED',
+                        current_office_id: office
                     })
                 });
                 const result = await response.json();
@@ -1275,4 +1276,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     // When switching to Incoming section, call fetchAndRenderIncomingDocs()
     // Example:
     // document.querySelector('.nav-link[data-section="incoming"]').addEventListener('click', fetchAndRenderIncomingDocs);
+
+    // Add after documentTypes and loadDocumentTypes
+    async function populateOutgoingOfficeDropdown() {
+        const res = await fetch('https://trackit-backend-xu6a.onrender.com/api/offices');
+        const offices = await res.json();
+        const officeSelect = document.getElementById('outgoingDocOffice');
+        if (!officeSelect) return;
+        officeSelect.innerHTML = '<option value="">-- Select Office --</option>';
+        offices.forEach(office => {
+            officeSelect.innerHTML += `<option value="${office._id}">${office.office_name}</option>`;
+        });
+    }
+    document.addEventListener('DOMContentLoaded', populateOutgoingOfficeDropdown);
 });
