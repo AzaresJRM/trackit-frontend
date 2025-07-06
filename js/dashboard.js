@@ -418,8 +418,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const remarks = document.getElementById('remarks').value;
 
             // Get logged-in user
-            const user = window.loggedInUser;
-            const requester_office_id = user.office_id;
+            const user = window.loggedInUser || JSON.parse(localStorage.getItem('loggedInUser'));
+            let requester_office_id = user.office_id;
+            if (requester_office_id && typeof requester_office_id === 'object' && requester_office_id._id) {
+                requester_office_id = requester_office_id._id;
+            }
             // Find the type_id for the selected type name
             const docType = documentTypes.find(dt => dt.type_name === type);
             if (!docType) {
@@ -443,7 +446,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     title,
                     content,
                     type_id,
-                    requester_office_id: requester_office_id && requester_office_id._id ? requester_office_id._id : requester_office_id,
+                    requester_office_id,
                     status: 'RELEASED'
                 })
             });
@@ -1043,8 +1046,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!title || !typeName || !office) return;
 
                 // Get logged-in user
-                const user = window.loggedInUser;
-                const requester_office_id = user.office_id;
+                const user = window.loggedInUser || JSON.parse(localStorage.getItem('loggedInUser'));
+                let requester_office_id = user.office_id;
+                if (requester_office_id && typeof requester_office_id === 'object' && requester_office_id._id) {
+                    requester_office_id = requester_office_id._id;
+                }
                 // Find the type_id for the selected type name
                 const docType = documentTypes.find(dt => dt.type_name === typeName);
                 if (!docType) {
@@ -1068,14 +1074,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         title,
                         content,
                         type_id,
-                        requester_office_id: requester_office_id && requester_office_id._id ? requester_office_id._id : requester_office_id,
+                        requester_office_id,
                         status: 'RELEASED'
                     })
                 });
                 const result = await response.json();
                 if (response.ok) {
-                    // Optionally, update your UI with the new document
-                    renderOutgoingCards();
+                    alert('Document successfully added!');
+                    await fetchAndRenderOutgoingDocs();
                     outgoingNewDocModal.style.display = 'none';
                     outgoingNewDocForm.reset();
                     if (window.updateSidebarBadges) window.updateSidebarBadges();
@@ -1158,4 +1164,13 @@ document.addEventListener('DOMContentLoaded', () => {
     window.loadDocumentTypes = loadDocumentTypes;
 
     loadDocumentTypes();
+
+    async function fetchAndRenderOutgoingDocs() {
+        // Fetch all outgoing documents from the backend
+        // Adjust the endpoint or query as needed for your backend
+        const res = await fetch('https://trackit-backend-xu6a.onrender.com/api/documents?type=outgoing');
+        const docs = await res.json();
+        window.outgoingDocs = docs;
+        renderOutgoingCards();
+    }
 });
