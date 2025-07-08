@@ -1297,3 +1297,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     await populateOutgoingOfficeDropdown();
 });
+
+// Expose document action functions globally for HTML onclick
+window.receiveDocument = receiveDocument;
+window.holdDocument = holdDocument;
+window.declineDocument = declineDocument;
