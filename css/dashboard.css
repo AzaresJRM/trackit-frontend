@@ -851,7 +851,7 @@ body {
 
 .settings a, .settings a:visited {
     color: #fff !important;
-}
+} 
 
 .track-search-bar {
     display: flex;
@@ -956,4 +956,41 @@ body {
     color: #2563eb;
     font-size: 1.1em;
     margin-top: 32px;
+} 
+
+.action-btn-group {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+.action-btn {
+  padding: 7px 18px;
+  border: none;
+  border-radius: 6px;
+  font-size: 1em;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+  box-shadow: 0 1.5px 6px rgba(44,62,80,0.10);
+}
+.receive-btn {
+  background: #27ae60;
+  color: #fff;
+}
+.receive-btn:hover {
+  background: #219150;
+}
+.hold-btn {
+  background: #f1c40f;
+  color: #222;
+}
+.hold-btn:hover {
+  background: #d4ac0d;
+}
+.decline-btn {
+  background: #e74c3c;
+  color: #fff;
+}
+.decline-btn:hover {
+  background: #c0392b;
 } 

@@ -1171,9 +1171,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <div class="card-row"><div class="label">Content:</div><div class="value">${doc.content || '-'}</div></div>
                     <div class="card-row"><div class="label">Type:</div><div class="value">${doc.type_id?.type_name || '-'}</div></div>
                     <div class="card-row"><div class="label">Status:</div><div class="value">${doc.status || '-'}</div></div>
-                    <button onclick="receiveDocument('${doc._id}')">Receive</button>
-                    <button onclick="holdDocument('${doc._id}')">Hold</button>
-                    <button onclick="declineDocument('${doc._id}')">Decline</button>
+                    <div class="action-btn-group">
+                      <button class="action-btn receive-btn" onclick="receiveDocument('${doc._id}')">Receive</button>
+                      <button class="action-btn hold-btn" onclick="holdDocument('${doc._id}')">Hold</button>
+                      <button class="action-btn decline-btn" onclick="declineDocument('${doc._id}')">Decline</button>
+                    </div>
                 </div>
             `;
             incomingContainer.appendChild(card);
