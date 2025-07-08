@@ -1302,3 +1302,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.holdDocument = holdDocument;
     window.declineDocument = declineDocument;
 });
+
+async function fetchAndRenderReceivedDocs() {
+    const user = JSON.parse(localStorage.getItem('loggedInUser'));
+    const myOfficeId = user.office_id?._id || user.office_id;
+    const res = await fetch(`https://trackit-backend-xu6a.onrender.com/api/documents/received?office_id=${myOfficeId}`);
+    const receivedDocs = await res.json();
+    window.receivedDocs = receivedDocs;
+    renderReceivedCards();
+}
