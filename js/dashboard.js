@@ -347,12 +347,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <div><b>Type:</b> ${doc.type_id?.type_name || '-'}</div>
                 <div><b>Current Office:</b> ${doc.current_office_id?.office_name || '-'}</div>
                 <div><b>Status:</b> ${doc.status}</div>
-            </div>
+                </div>
             <div class="track-doc-timeline">
                 <h4>Status Timeline</h4>
                 ${renderTimeline(doc.status_history)}
+                </div>
             </div>
-        </div>
         `;
     }
 
@@ -1173,6 +1173,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <div class="card-row"><div class="label">Status:</div><div class="value">${doc.status || '-'}</div></div>
                     <button onclick="receiveDocument('${doc._id}')">Receive</button>
                     <button onclick="holdDocument('${doc._id}')">Hold</button>
+                    <button onclick="declineDocument('${doc._id}')">Decline</button>
                 </div>
             `;
             incomingContainer.appendChild(card);
@@ -1188,36 +1189,81 @@ document.addEventListener('DOMContentLoaded', async () => {
         const user = JSON.parse(localStorage.getItem('loggedInUser'));
         const myOfficeId = user.office_id?._id || user.office_id;
         const myUserId = user._id;
-        await fetch(`https://trackit-backend-xu6a.onrender.com/api/documents/${docId}/status`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                status: 'RECEIVED',
-                from_office_id: myOfficeId,
-                to_office_id: myOfficeId,
-                user_id: myUserId,
-                remarks: 'Document received'
-            })
-        });
-        await fetchAndRenderIncomingDocs();
+        if (!confirm('Are you sure you want to mark this document as RECEIVED?')) return;
+        try {
+            const res = await fetch(`https://trackit-backend-xu6a.onrender.com/api/documents/${docId}/action`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'receive',
+                    office_id: myOfficeId,
+                    user_id: myUserId,
+                    remarks: 'Document received'
+                })
+            });
+            if (!res.ok) throw new Error('Failed to receive document');
+            alert('Document marked as RECEIVED.');
+            await fetchAndRenderIncomingDocs();
+            await fetchAndRenderReceivedDocs();
+            // Switch to Received section
+            const receivedSection = document.getElementById('received-section');
+            const receivedLink = document.querySelector('.nav-link[data-section="received"]');
+            if (receivedSection && receivedLink) {
+                showSection(receivedSection, receivedLink, 'Received Documents');
+            }
+        } catch (err) {
+            alert('Error: ' + err.message);
+        }
     }
 
     async function holdDocument(docId) {
         const user = JSON.parse(localStorage.getItem('loggedInUser'));
         const myOfficeId = user.office_id?._id || user.office_id;
         const myUserId = user._id;
-        await fetch(`https://trackit-backend-xu6a.onrender.com/api/documents/${docId}/status`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                status: 'ON_HOLD',
-                from_office_id: myOfficeId,
-                to_office_id: myOfficeId,
-                user_id: myUserId,
-                remarks: 'Document put on hold'
-            })
-        });
-        await fetchAndRenderIncomingDocs();
+        if (!confirm('Are you sure you want to put this document ON HOLD?')) return;
+        let remarks = prompt('Optional: Enter a reason for putting this document on hold:', '');
+        try {
+            const res = await fetch(`https://trackit-backend-xu6a.onrender.com/api/documents/${docId}/action`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'hold',
+                    office_id: myOfficeId,
+                    user_id: myUserId,
+                    remarks: remarks || 'Document put on hold'
+                })
+            });
+            if (!res.ok) throw new Error('Failed to put document on hold');
+            alert('Document put ON HOLD.');
+            await fetchAndRenderIncomingDocs();
+        } catch (err) {
+            alert('Error: ' + err.message);
+        }
+    }
+
+    async function declineDocument(docId) {
+        const user = JSON.parse(localStorage.getItem('loggedInUser'));
+        const myOfficeId = user.office_id?._id || user.office_id;
+        const myUserId = user._id;
+        if (!confirm('Are you sure you want to DECLINE this document?')) return;
+        let remarks = prompt('Optional: Enter a reason for declining this document:', '');
+        try {
+            const res = await fetch(`https://trackit-backend-xu6a.onrender.com/api/documents/${docId}/action`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'decline',
+                    office_id: myOfficeId,
+                    user_id: myUserId,
+                    remarks: remarks || 'Document declined'
+                })
+            });
+            if (!res.ok) throw new Error('Failed to decline document');
+            alert('Document DECLINED.');
+            await fetchAndRenderIncomingDocs();
+        } catch (err) {
+            alert('Error: ' + err.message);
+        }
     }
 
     // On page load, also fetch incoming docs
