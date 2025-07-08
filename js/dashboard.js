@@ -761,153 +761,174 @@ document.addEventListener('DOMContentLoaded', async () => {
     // In modal handlers, after moving a card, also call window.updateSummaryCards();
 
     // --- RECEIVED SECTION MODULAR LOGIC ---
+    // Refactored to use backend data, add Forward button, and modal
     (function() {
-        // Dummy data for received documents
-        window.receivedDocs = window.receivedDocs || [
-            {
-                code: 'VPAA-2025-06-0001',
-                requisitioner: 'VPAA',
-                title: 'REQUEST OF SPECIAL CLASS FORM',
-                content: 'Request for special class',
-                type: 'SPECIAL CLASS FORM',
-                forwardedTo: null
+        let offices = [];
+        // Fetch offices if not already loaded
+        async function ensureOfficesLoaded() {
+            if (offices.length > 0) return offices;
+            try {
+                const res = await fetch('https://trackit-backend-xu6a.onrender.com/api/offices');
+                offices = await res.json();
+            } catch (err) {
+                offices = [];
             }
-        ];
-        const officeOptions = [
-            'VPAA',
-            "CLASE Dean's Office",
-            'Registrar',
-            'Accounting',
-            'HRMO',
-            'CSIT Office'
-        ];
-        const currentOffice = 'CSIT Office';
+            return offices;
+        }
 
-        // Render received cards
-        function renderReceivedCards() {
+        // Render received cards using backend data
+        window.renderReceivedCards = function renderReceivedCards() {
             const container = document.getElementById('received-container');
             if (!container) return;
+            const docs = window.receivedDocs || [];
             container.innerHTML = '';
-            receivedDocs.forEach((doc, idx) => {
+            docs.forEach((doc, idx) => {
                 const card = document.createElement('div');
                 card.className = 'document-card received-card';
                 card.innerHTML = `
                     <div class="card-header">
-                        <div class="document-code">${doc.code}</div>
+                        <div class="document-code">${doc.document_code || '-'}</div>
                     </div>
                     <div class="card-content">
-                        <div class="card-row"><div class="label">Requisitioner:</div><div class="value">${doc.requisitioner}</div></div>
-                        <div class="card-row"><div class="label">Title:</div><div class="value">${doc.title}</div></div>
-                        <div class="card-row"><div class="label">Content:</div><div class="value">${doc.content || ''}</div></div>
-                        <div class="card-row"><div class="label">Type:</div><div class="value">${doc.type}</div></div>
-                        ${doc.forwardedTo ? `<div class='card-row'><span class='label'>Forwarded to:</span> <span class='value forwarded-label'>${doc.forwardedTo}</span></div>` : ''}
-                </div>
+                        <div class="card-row"><div class="label">Requisitioner:</div><div class="value">${doc.requisitioner || '-'}</div></div>
+                        <div class="card-row"><div class="label">Title:</div><div class="value">${doc.title || '-'}</div></div>
+                        <div class="card-row"><div class="label">Content:</div><div class="value">${doc.content || '-'}</div></div>
+                        <div class="card-row"><div class="label">Type:</div><div class="value">${doc.type_id?.type_name || '-'}</div></div>
+                        <div class="card-row"><div class="label">Status:</div><div class="value">${doc.status || '-'}</div></div>
+                        <button class="action-btn forward-btn" style="margin-top:12px;" data-idx="${idx}">Forward</button>
+                    </div>
                 `;
+                card.querySelector('.forward-btn').addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    openForwardModal(idx);
+                });
                 card.style.cursor = 'pointer';
                 card.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    openReceivedModal(idx);
+                    if (!e.target.classList.contains('forward-btn')) openReceivedModal(idx);
                 });
                 container.appendChild(card);
             });
-        }
+        };
 
         // Modal creation (if not present)
-        let receivedModal = document.getElementById('received-action-modal');
-        if (!receivedModal) {
-            receivedModal = document.createElement('div');
-            receivedModal.id = 'received-action-modal';
-            receivedModal.className = 'modal';
-            receivedModal.style.display = 'none';
-            document.body.appendChild(receivedModal);
+        let forwardModal = document.getElementById('received-forward-modal');
+        if (!forwardModal) {
+            forwardModal = document.createElement('div');
+            forwardModal.id = 'received-forward-modal';
+            forwardModal.className = 'modal';
+            forwardModal.style.display = 'none';
+            document.body.appendChild(forwardModal);
         }
 
-        // Open modal for received card
-        function openReceivedModal(index) {
-            const doc = receivedDocs[index];
+        // Open modal for forwarding
+        async function openForwardModal(index) {
+            const doc = window.receivedDocs[index];
             if (!doc) return;
+            const officesList = await ensureOfficesLoaded();
+            const user = JSON.parse(localStorage.getItem('loggedInUser'));
+            const myOfficeId = user.office_id?._id || user.office_id;
+            const officeOptions = officesList.filter(o => o._id !== myOfficeId);
+            forwardModal.innerHTML = `
+                <div class="modal-content" style="max-width:420px;width:96%;border-radius:16px;box-shadow:0 8px 32px rgba(44,62,80,0.18),0 1.5px 6px rgba(44,62,80,0.10);padding:32px 32px 24px 32px;">
+                    <h2 style="margin-top:0;margin-bottom:20px;font-size:1.2em;font-weight:700;color:#222;">Forward Document</h2>
+                    <div style="margin-bottom: 16px;line-height:1.7;">
+                        <strong>Code:</strong> ${doc.document_code || '-'}<br>
+                        <strong>Title:</strong> ${doc.title || '-'}<br>
+                        <strong>Type:</strong> ${doc.type_id?.type_name || '-'}<br>
+                    </div>
+                    <div style="margin-bottom:18px;">
+                        <label for="forward-office-select"><strong>Forward to Office:</strong></label>
+                        <select id="forward-office-select" style="margin-left:8px;padding:7px 12px;border-radius:6px;border:1px solid #ddd;">
+                            <option value="">-- Select Office --</option>
+                            ${officeOptions.map(o => `<option value="${o._id}">${o.office_name}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div style="margin-bottom:18px;">
+                        <label for="forward-remarks"><strong>Remarks (optional):</strong></label><br>
+                        <textarea id="forward-remarks" style="width:100%;min-height:60px;border-radius:6px;border:1px solid #ddd;padding:7px;"></textarea>
+                    </div>
+                    <div style="display:flex;gap:10px;justify-content:flex-end;">
+                        <button id="cancel-forward-btn" class="btn-cancel" style="background:#f1f5f9;color:#222;">Cancel</button>
+                        <button id="confirm-forward-btn" class="btn-logout" style="background:#27ae60;color:white;">Forward</button>
+                    </div>
+                    <div id="forward-status-msg" style="margin-top:10px;color:#e74c3c;"></div>
+                </div>
+            `;
+            forwardModal.style.display = 'flex';
+            const officeSelect = forwardModal.querySelector('#forward-office-select');
+            const remarksInput = forwardModal.querySelector('#forward-remarks');
+            const statusMsg = forwardModal.querySelector('#forward-status-msg');
+            const confirmBtn = forwardModal.querySelector('#confirm-forward-btn');
+            confirmBtn.disabled = true;
+            officeSelect.addEventListener('change', function() {
+                confirmBtn.disabled = !officeSelect.value;
+            });
+            forwardModal.querySelector('#cancel-forward-btn').onclick = () => forwardModal.style.display = 'none';
+            confirmBtn.onclick = async function() {
+                if (!officeSelect.value) return;
+                confirmBtn.disabled = true;
+                statusMsg.textContent = 'Forwarding...';
+                try {
+                    const user = JSON.parse(localStorage.getItem('loggedInUser'));
+                    const myUserId = user._id;
+                    const res = await fetch(`https://trackit-backend-xu6a.onrender.com/api/documents/${doc._id}/action`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            action: 'forward',
+                            office_id: officeSelect.value,
+                            user_id: myUserId,
+                            remarks: remarksInput.value
+                        })
+                    });
+                    if (!res.ok) throw new Error('Failed to forward document');
+                    statusMsg.style.color = '#27ae60';
+                    statusMsg.textContent = 'Document forwarded successfully!';
+                    await fetchAndRenderReceivedDocs();
+                    setTimeout(() => { forwardModal.style.display = 'none'; }, 800);
+                } catch (err) {
+                    statusMsg.style.color = '#e74c3c';
+                    statusMsg.textContent = 'Error: ' + err.message;
+                    confirmBtn.disabled = false;
+                }
+            };
+            forwardModal.onclick = function(e) {
+                if (e.target === forwardModal) forwardModal.style.display = 'none';
+            };
+        }
+
+        // Optionally, keep the old openReceivedModal for details
+        window.openReceivedModal = function openReceivedModal(index) {
+            const doc = window.receivedDocs[index];
+            if (!doc) return;
+            let receivedModal = document.getElementById('received-action-modal');
+            if (!receivedModal) {
+                receivedModal = document.createElement('div');
+                receivedModal.id = 'received-action-modal';
+                receivedModal.className = 'modal';
+                receivedModal.style.display = 'none';
+                document.body.appendChild(receivedModal);
+            }
             receivedModal.innerHTML = `
                 <div class="modal-content" style="max-width:420px;width:96%;border-radius:16px;box-shadow:0 8px 32px rgba(44,62,80,0.18),0 1.5px 6px rgba(44,62,80,0.10);padding:32px 32px 24px 32px;">
-                    <h2 style="margin-top:0;margin-bottom:20px;font-size:1.2em;font-weight:700;color:#222;">Document Actions</h2>
+                    <h2 style="margin-top:0;margin-bottom:20px;font-size:1.2em;font-weight:700;color:#222;">Document Details</h2>
                     <div style="margin-bottom: 16px;line-height:1.7;">
-                        <strong>Code:</strong> ${doc.code}<br>
-                        <strong>Requisitioner:</strong> ${doc.requisitioner}<br>
-                        <strong>Title:</strong> ${doc.title}<br>
-                        <strong>Type:</strong> ${doc.type}<br>
-                        <strong>Content:</strong> ${doc.content || ''}<br>
-                        ${doc.forwardedTo ? `<strong>Forwarded to:</strong> ${doc.forwardedTo}<br>` : ''}
-                    </div>
-                    <div style="display:flex;gap:10px;margin-bottom:18px;">
-                        <button id="view-details-btn" class="btn-cancel" style="background:#f1f5f9;color:#222;">View Details</button>
-                        <button id="delete-doc-btn" class="btn-cancel" style="background:#e74c3c;color:white;">Delete</button>
-                    </div>
-                    <div style="margin-top:10px;margin-bottom:18px;">
-                        <label for="forward-office-select"><strong>Forward to Office:</strong></label>
-                        <select id="forward-office-select" style="margin-left:8px;padding:7px 12px;border-radius:6px;border:1px solid #ddd;">${officeOptions.filter(o => o !== currentOffice).map(o => `<option value='${o}'>${o}</option>`).join('')}</select>
-                        <button id="forward-doc-btn" class="btn-logout" style="background:#27ae60;color:white;margin-left:10px;padding:7px 18px;border-radius:6px;">Forward</button>
+                        <strong>Code:</strong> ${doc.document_code || '-'}<br>
+                        <strong>Requisitioner:</strong> ${doc.requisitioner || '-'}<br>
+                        <strong>Title:</strong> ${doc.title || '-'}<br>
+                        <strong>Type:</strong> ${doc.type_id?.type_name || '-'}<br>
+                        <strong>Content:</strong> ${doc.content || '-'}<br>
+                        <strong>Status:</strong> ${doc.status || '-'}<br>
                     </div>
                     <button id="close-received-modal" class="btn-cancel" style="margin-top:10px;background:#f1f5f9;color:#222;">Close</button>
                 </div>
             `;
             receivedModal.style.display = 'flex';
             receivedModal.querySelector('#close-received-modal').onclick = () => receivedModal.style.display = 'none';
-            receivedModal.querySelector('#delete-doc-btn').onclick = function() {
-                receivedDocs.splice(index, 1);
-                renderReceivedCards();
-                receivedModal.style.display = 'none';
-            };
-            receivedModal.querySelector('#view-details-btn').onclick = function() {
-                alert(`Details:\nCode: ${doc.code}\nRequisitioner: ${doc.requisitioner}\nTitle: ${doc.title}\nType: ${doc.type}\nContent: ${doc.content || ''}`);
-            };
-            receivedModal.querySelector('#forward-doc-btn').onclick = function() {
-                const toOffice = receivedModal.querySelector('#forward-office-select').value;
-                forwardReceivedDoc(index, toOffice);
-                receivedModal.style.display = 'none';
-            };
             receivedModal.onclick = function(e) {
                 if (e.target === receivedModal) receivedModal.style.display = 'none';
             };
-        }
-
-        // Forward logic for received
-        function forwardReceivedDoc(index, toOffice) {
-            const doc = receivedDocs[index];
-            if (!doc) return;
-            // Mark as forwarded
-            doc.forwardedTo = toOffice;
-            // Remove from received
-            receivedDocs.splice(index, 1);
-            // Move to forwarded section
-            const forwardedContainer = document.getElementById('forwarded-container');
-            if (forwardedContainer) {
-                const card = document.createElement('div');
-                card.className = 'document-card forwarded-card';
-                card.innerHTML = `
-                    <div class="card-header">
-                        <div class="document-code">${doc.code}</div>
-                    </div>
-                    <div class="card-content">
-                        <div class="card-row"><div class="label">Requisitioner:</div><div class="value">${doc.requisitioner}</div></div>
-                        <div class="card-row"><div class="label">Title:</div><div class="value">${doc.title}</div></div>
-                        <div class="card-row"><div class="label">Content:</div><div class="value">${doc.content || ''}</div></div>
-                        <div class="card-row"><div class="label">Type:</div><div class="value">${doc.type}</div></div>
-                        <div class='card-row'><span class='label'>Forwarded to:</span> <span class='value forwarded-label'>${toOffice}</span></div>
-                </div>
-                `;
-                forwardedContainer.appendChild(card);
-            }
-            renderReceivedCards();
-            if (window.updateSidebarBadges) window.updateSidebarBadges();
-            if (window.updateSummaryCards) window.updateSummaryCards();
-        }
-
-        // Expose for testing
-        window.renderReceivedCards = renderReceivedCards;
-        window.openReceivedModal = openReceivedModal;
-        window.forwardReceivedDoc = forwardReceivedDoc;
-
-        // Initial render
-        renderReceivedCards();
+        };
     })();
 
     // --- OUTGOING NEW DOCUMENT MODAL LOGIC ---
