@@ -293,21 +293,89 @@ document.addEventListener('DOMContentLoaded', async () => {
     const trackMonth = document.getElementById('track-month');
     const trackTime = document.getElementById('track-time');
     const trackResults = document.getElementById('track-results');
+    const trackResultsTableContainer = document.getElementById('track-results-table-container');
+    const trackMockToggle = document.getElementById('track-mock-toggle');
+
+    // Mock data for testing
+    const mockDocs = [
+        {
+            document_code: 'VPAA-2025-06-0001',
+            title: 'REQUEST OF SPECIAL CLASS FORM',
+            type_id: { type_name: 'SPECIAL CLASS FORM' },
+            current_office_id: { office_name: 'VPAA' },
+            status: 'RECEIVED',
+            status_history: [
+                { status: 'RECEIVED', office_name: 'VPAA', user_name: 'Admin', date: new Date().toISOString() },
+                { status: 'RELEASED', office_name: 'Registrar', user_name: 'Registrar', date: new Date().toISOString() }
+            ]
+        },
+        {
+            document_code: 'CSIT-2025-06-0002',
+            title: 'REQUEST TO JOIN IN SPECIAL CLASS',
+            type_id: { type_name: 'FORM' },
+            current_office_id: { office_name: 'CSIT OFFICE' },
+            status: 'RELEASED',
+            status_history: [
+                { status: 'RELEASED', office_name: 'CSIT OFFICE', user_name: 'CSIT Admin', date: new Date().toISOString() }
+            ]
+        },
+        // New mock document for the requested scenario
+        {
+            document_code: 'CSIT-2025-07-0003',
+            title: 'Request to Join the Special Class',
+            type_id: { type_name: 'COMMUNICATION' },
+            current_office_id: { office_name: 'VPAA' },
+            status: 'COMPLETED',
+            status_history: [
+                { status: 'FORWARDED', office_name: 'CSIT Office', user_name: 'CSIT Admin', date: '2025-07-09T09:00:00' },
+                { status: 'FORWARDED', office_name: "CLASE Dean's Office", user_name: "Dean's Secretary", date: '2025-07-09T10:00:00' },
+                { status: 'COMPLETED', office_name: 'VPAA', user_name: 'VPAA Admin', date: '2025-07-09T11:00:00' }
+            ]
+        }
+    ];
 
     if (trackSearchBtn) {
         trackSearchBtn.addEventListener('click', async () => {
             trackResults.innerHTML = '<div class="track-loading">Searching...</div>';
+            trackResultsTableContainer.innerHTML = '';
             const code = trackDocCode.value.trim();
             const date = trackDate.value;
             const month = trackMonth.value;
             const time = trackTime.value;
-            const docs = await fetchTrackedDocument({ code, date, month, time });
-            if (Array.isArray(docs) && docs.length > 0) {
-                trackResults.innerHTML = docs.map(renderTrackResult).join('');
-            } else if (docs && docs._id) {
-                trackResults.innerHTML = renderTrackResult(docs);
-            } else {
-                trackResults.innerHTML = '<div class="track-no-result">No document found.</div>';
+            const useMock = trackMockToggle && trackMockToggle.checked;
+            let docs;
+            try {
+                if (useMock) {
+                    // Filter mock data
+                    docs = mockDocs.filter(doc => {
+                        let match = true;
+                        if (code) match = match && doc.document_code.includes(code);
+                        if (date) match = match && true; // Add date logic if needed
+                        if (month) match = match && true; // Add month logic if needed
+                        if (time) match = match && true; // Add time logic if needed
+                        return match;
+                    });
+                    await new Promise(r => setTimeout(r, 600)); // Simulate loading
+                } else {
+                    docs = await fetchTrackedDocument({ code, date, month, time });
+                }
+                if (Array.isArray(docs) && docs.length > 1) {
+                    // Render as table
+                    trackResults.innerHTML = '';
+                    trackResultsTableContainer.innerHTML = renderTrackResultsTable(docs);
+                } else if (Array.isArray(docs) && docs.length === 1) {
+                    trackResultsTableContainer.innerHTML = '';
+                    trackResults.innerHTML = renderTrackResult(docs[0]);
+                } else if (docs && docs._id) {
+                    trackResultsTableContainer.innerHTML = '';
+                    trackResults.innerHTML = renderTrackResult(docs);
+                } else {
+                    trackResultsTableContainer.innerHTML = '';
+                    trackResults.innerHTML = '<div class="track-no-result">No document found.</div>';
+                }
+            } catch (err) {
+                trackResultsTableContainer.innerHTML = '';
+                trackResults.innerHTML = '<div class="track-no-result">Error fetching documents.</div>';
             }
         });
     }
@@ -355,6 +423,31 @@ document.addEventListener('DOMContentLoaded', async () => {
             </div>
         `;
     }
+
+    function renderTrackResultsTable(docs) {
+        return `<div class="track-table-container"><table class="track-table"><thead><tr><th>Code</th><th>Title</th><th>Type</th><th>Current Office</th><th>Status</th><th>Action</th></tr></thead><tbody>
+        ${docs.map((doc, i) => `
+            <tr>
+                <td>${doc.document_code}</td>
+                <td>${doc.title}</td>
+                <td>${doc.type_id?.type_name || '-'}</td>
+                <td>${doc.current_office_id?.office_name || '-'}</td>
+                <td>${doc.status}</td>
+                <td><button class="track-view-btn" data-index="${i}">View</button></td>
+            </tr>
+        `).join('')}
+    </tbody></table></div>`;
+    }
+
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('track-view-btn')) {
+            const idx = e.target.getAttribute('data-index');
+            let docs = trackMockToggle && trackMockToggle.checked ? mockDocs : [];
+            if (!docs.length) return;
+            trackResultsTableContainer.innerHTML = '';
+            trackResults.innerHTML = renderTrackResult(docs[idx]);
+        }
+    });
 
     // Form submission for new documents
     const newDocumentForm = document.getElementById('newDocumentForm');
