@@ -321,7 +321,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         },
         // New mock document for the requested scenario
         {
-            document_code: 'CSIT-2025-07-0003',
+            document_code: 'COMM-CSIT-2025-07-0003',
             title: 'Request to Join the Special Class',
             type_id: { type_name: 'COMMUNICATION' },
             current_office_id: { office_name: 'VPAA' },
@@ -338,7 +338,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         trackSearchBtn.addEventListener('click', async () => {
             trackResults.innerHTML = '<div class="track-loading">Searching...</div>';
             trackResultsTableContainer.innerHTML = '';
-            const code = trackDocCode.value.trim();
+            const code = trackDocCode.value.trim().toLowerCase();
             const date = trackDate.value;
             const month = trackMonth.value;
             const time = trackTime.value;
@@ -346,10 +346,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             let docs;
             try {
                 if (useMock) {
-                    // Filter mock data
+                    // Filter mock data (case-insensitive, trimmed)
                     docs = mockDocs.filter(doc => {
                         let match = true;
-                        if (code) match = match && doc.document_code.includes(code);
+                        if (code) match = match && doc.document_code.toLowerCase().includes(code);
                         if (date) match = match && true; // Add date logic if needed
                         if (month) match = match && true; // Add month logic if needed
                         if (time) match = match && true; // Add time logic if needed
