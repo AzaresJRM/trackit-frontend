@@ -402,13 +402,16 @@
             <div class="content-section track-section" id="track-section" style="display:none;">
                 <div class="content-header">
                     <h2>Track Documents</h2>
-                </div>
+                    </div>
                 <div class="track-search-bar">
                     <input type="text" id="track-doc-code" placeholder="Enter Document Code..." style="width:220px; padding:8px; border-radius:6px; border:1px solid #ccc; margin-right:12px;">
                     <input type="date" id="track-date" style="padding:8px; border-radius:6px; border:1px solid #ccc; margin-right:8px;">
                     <input type="month" id="track-month" style="padding:8px; border-radius:6px; border:1px solid #ccc; margin-right:8px;">
                     <input type="time" id="track-time" style="padding:8px; border-radius:6px; border:1px solid #ccc; margin-right:8px;">
                     <button id="track-search-btn" style="background:#2563eb; color:#fff; border:none; border-radius:6px; padding:8px 20px; font-weight:600; cursor:pointer;">Search</button>
+                    <label style="margin-left:18px; display:flex; align-items:center; gap:4px; font-size:0.98em;">
+                        <input type="checkbox" id="track-mock-toggle" style="margin-right:4px;"> Test Mode
+                    </label>
                 </div>
                 <div id="track-results" style="margin-top:32px;"></div>
             </div>
